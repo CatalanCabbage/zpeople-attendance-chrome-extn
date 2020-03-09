@@ -14,7 +14,7 @@ function getCookie(inputUrl, inputName) {
         }
     });
 }
-function (tab){
+function getRequiredCookies(tab){
     iamadt = getCookie(tab.url, '_iamadt');
     iambdt = getCookie(tab.url, '_iambdt');
 }
