@@ -1,15 +1,16 @@
 {
     "manifest_version": 2,
   
-    "name": "Zoho People Check-In",
+    "name": "Zoho WFH Availability",
     "description": "This extension will enable you to Check-In or Check-Out in Zoho People",
     "version": "1.0",
     "background": {
         "scripts": ["background.js"],
         "persistent": false
       },
-    "page_action": {
-     "default_icon": "icon-16.png"
+    "browser_action": {
+     "default_icon": "ZPeople-icon.png",
+     "default_title": "Check current Availability"
     },
     "permissions": [
      "cookies",

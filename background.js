@@ -1,30 +1,4 @@
 /**
- * Zoho IAM cookie params are required for request to Zoho People
- * IAM cookie is present only on logged in *.zoho.com pages
- * Therefore, disable the extension on pages without "zoho" in the URL
- * Not handling edge cases.
- */
-// When the extension is installed or upgraded ...
-chrome.runtime.onInstalled.addListener(function() {
-    // Replace all rules ...
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-      // With a new rule ...
-      chrome.declarativeContent.onPageChanged.addRules([
-        {
-          // That fires when a page's URL contains 'zoho' ...
-          conditions: [
-            new chrome.declarativeContent.PageStateMatcher({
-              pageUrl: { urlContains: 'zoho' },
-            })
-          ],
-          // And shows the extension's page action(the logo).
-          actions: [new chrome.declarativeContent.ShowPageAction()]
-        }
-      ]);
-    });
-  });
-
-/**
  * Get required IAM cookies from any zoho page: _iamadt, _iambdt
  */
 let iamadt, iambdt, conreqcsr;
@@ -40,7 +14,7 @@ function getCookie(inputUrl, inputName) {
         }
     });
 }
-function getRequiredCookies(tab){
+function (tab){
     iamadt = getCookie(tab.url, '_iamadt');
     iambdt = getCookie(tab.url, '_iambdt');
 }
@@ -60,6 +34,10 @@ function getCsrfParam() {
                     //alert(data);
                     let result = (data.match(/csrfToken\s=\s\'([^;]*)\'/));
                     conreqcsr = result[1];
+                    if(conreqcsr == null) {
+                        alert("Please log into any Zoho service!");
+                        throw "conreqcsr = null";
+                    }
                     punchAction();
                 })
         } else {
@@ -85,10 +63,10 @@ function punchAction() {
                     isCheckedOut = data.allowedToCheckIn;
                     let performAction, actionToBePerformed;
                     if(isCheckedOut === true) {
-                        performAction = confirm("Currently Checked Out.\nDo you want to Check-in?");
+                        performAction = confirm("You're currently Checked Out.\nDo you want to Check-in?");
                         actionToBePerformed = "punchIn"; 
                     } else if(isCheckedOut === false){
-                        performAction = confirm("Currently Checked In.\nDo you want to Check-out?");
+                        performAction = confirm("You're currently Checked In.\nDo you want to Check-out?");
                         actionToBePerformed = "punchOut";
                     } else {
                         alert("Error; isCheckedOut =" + isCheckedOut);
@@ -124,13 +102,13 @@ function performPunchAction(actionToBePerformed) {
                 .then(data => {
                     if(actionToBePerformed == "punchIn") {
                         if(data.msg.punchIn != null || data.msg.error == "alreadyIn") {
-                            alert("Check-in successful");
+                            alert("Successfully checked in!");
                         } else {
                             alert("Could not Check in :(");
                         }
                     } else if(actionToBePerformed == "punchOut") {
                         if(data.punchOut.tsecs != null || data.punchOut.error == "alreadyOut") {
-                            alert("Check-out successful");
+                            alert("Successfully checked out!");
                         } else {
                             alert("Could not Check out :(");
                         }
@@ -148,11 +126,7 @@ function performPunchAction(actionToBePerformed) {
 }
 
 
-chrome.pageAction.onClicked.addListener(function(tab) {
-    //Change icon on click
-    chrome.pageAction.setIcon({tabId: tab.id, path: '/icon2-16.png'});
-    //getRequiredCookies(tab);
-    
+chrome.browserAction.onClicked.addListener(function(tab) {    
     chrome.cookies.getAll({ url: tab.url },
     function (cookie) {
         if (cookie) {
@@ -162,8 +136,6 @@ chrome.pageAction.onClicked.addListener(function(tab) {
             alert('Cookie not found');
         }
     });
-
-
 });
 
 
