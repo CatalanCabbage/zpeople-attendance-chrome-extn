@@ -1,7 +1,6 @@
 /**
- * Get required IAM cookies from any zoho page: _iamadt, _iambdt
+ * If specific Cookies need to be extracted
  */
-let iamadt, iambdt, conreqcsr;
 function getCookie(inputUrl, inputName) {
     chrome.cookies.get({ url: inputUrl, name: inputName },
     function (cookie) {
@@ -14,31 +13,29 @@ function getCookie(inputUrl, inputName) {
         }
     });
 }
-function getRequiredCookies(tab){
-    iamadt = getCookie(tab.url, '_iamadt');
-    iambdt = getCookie(tab.url, '_iambdt');
-}
 
+let conreqcsr;
 
+/**
+ * The CSRF param is required by the check-in/check-out URL
+ * Makes a call to a general page and extracts the CSRF token from the response
+ */
 function getCsrfParam() {
     fetch('https://people.zoho.com/zpeoplehr/zp', {
         method: "GET",
-        headers: {
-        },
         credentials: 'include'
       })
       .then(response => {
         if (response.status >= 200 && response.status < 300) {
             response.text()
                 .then(data => {
-                    //alert(data);
+                    //Get the csrf token from HTML response
                     let result = (data.match(/csrfToken\s=\s\'([^;]*)\'/));
                     conreqcsr = result[1];
                     if(conreqcsr == null) {
                         alert("Please log into any Zoho service!");
                         throw "conreqcsr = null";
                     }
-                    punchAction();
                 })
         } else {
           throw error;
@@ -47,6 +44,9 @@ function getCsrfParam() {
       .catch(error => { console.log('request failed', error); });
 }
 
+/**
+ * Gets the current status(checked-in or out?) and decides action based on the status
+ */
 function punchAction() {
     fetch('https://people.zoho.com/zpeoplehr/AttendanceAction.zp', {
         method: "POST",
@@ -87,6 +87,9 @@ function punchAction() {
       .catch(error => { console.log('request failed', error); });
 }
 
+/**
+ * Checks and performs the check-in/out action based on the input param
+ */
 function performPunchAction(actionToBePerformed) {
     fetch('https://people.zoho.com/zpeoplehr/AttendanceAction.zp', {
         method: "POST",
@@ -100,6 +103,7 @@ function performPunchAction(actionToBePerformed) {
         if (response.status >= 200 && response.status < 300) {
             response.json()
                 .then(data => {
+                    //Check if action was successfully performed
                     if(actionToBePerformed == "punchIn") {
                         if(data.msg.punchIn != null || data.msg.error == "alreadyIn") {
                             alert("Successfully checked in!");
@@ -125,12 +129,15 @@ function performPunchAction(actionToBePerformed) {
       .catch(error => { alert("error : " + error); });
 }
 
-
+/**
+ * Gets Cookies for authentication in future requests
+ */
 chrome.browserAction.onClicked.addListener(function(tab) {    
     chrome.cookies.getAll({ url: tab.url },
     function (cookie) {
         if (cookie) {
             getCsrfParam(cookie);
+            punchAction();
         }
         else {
             alert('Cookie not found');
