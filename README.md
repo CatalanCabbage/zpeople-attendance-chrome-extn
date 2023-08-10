@@ -3,6 +3,9 @@
 
  Chromium browser extension to view status and check-in/check-out in [Zoho People](https://www.zoho.com/people/) _from any tab_ in the browser.
 
+ ![image](https://github.com/CatalanCabbage/zpeople-attendance-chrome-extn/assets/45961072/f3bc48de-1b20-4881-86ba-a55c55c3b998)
+
+
 
 ### Why?
 * At the start of [WFH in Zoho Corporation](https://www.zoho.com/general/blog/how-zoho-went-remote-on-zoho.html), the feature [attendance in Zoho People](https://www.zoho.com/people/attendance-tracker.html) was used to determine if a co-worker was currently available or not
